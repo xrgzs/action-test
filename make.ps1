@@ -4,6 +4,10 @@ Remove-Item -Path ".\temp\" -Recurse -ErrorAction Ignore
 New-Item -Path ".\bin\" -ItemType "directory" -ErrorAction Ignore
 New-Item -Path ".\temp\" -ItemType "directory" -ErrorAction Ignore
 
+if (-not (Test-Path -Path ".\bin\rclone.conf")) {
+    Write-Error "rclone conf not found"
+}
+
 if (-not (Test-Path -Path ".\bin\aria2c.exe")) {
     Write-Host "aria2c not found, downloading..."
     Invoke-WebRequest -Uri 'https://github.com/aria2/aria2/releases/download/release-1.37.0/aria2-1.37.0-win-64bit-build1.zip' -outfile .\temp\aria2.zip

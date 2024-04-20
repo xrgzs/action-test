@@ -23,14 +23,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Get rclone Config
-        shell: pwsh
-        run: |
-          New-Item -Path ".\bin\" -ItemType "directory" -ErrorAction Ignore
-          Write-Output "${{ secrets.RCLONE_CONFIG }}" >".\bin\rclone.conf"
-          if (-not (Test-Path -Path ".\bin\rclone.conf")) {
-            Write-Error "rclone conf not found"
-            exit 1
-          }
+        uses: actions/checkout@v4
+        with:
+          repository: xrgzs/rclone-action
+          token: ${{ secrets.RCLONE_TOKEN }}
+          path: bin
 
       - name: Big Task
         shell: pwsh
