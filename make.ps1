@@ -17,7 +17,7 @@ if (-not (Test-Path -Path ".\bin\wimlib\wimlib-imagex.exe")) {
     Expand-Archive -Path .\temp\wimlib.zip -DestinationPath .\bin\wimlib -Force
 }
 
-if (-not (Test-Path -Path ".\bin\wimlib\wimlib-imagex.exe")) {
+if (-not (Test-Path -Path ".\bin\wimlib\rclone.exe")) {
     Write-Host "rclone not found, downloading..."
     Invoke-WebRequest -Uri 'https://downloads.rclone.org/rclone-current-windows-amd64.zip' -outfile .\temp\rclone.zip
     Expand-Archive -Path .\temp\rclone.zip -DestinationPath .\temp\ -Force

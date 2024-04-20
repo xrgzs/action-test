@@ -26,7 +26,11 @@ jobs:
         shell: pwsh
         run: |
           New-Item -Path ".\bin\" -ItemType "directory" -ErrorAction Ignore
-          Write-Output "${{ secrets.RSYNC_CONFIG }}"
+          Write-Output "${{ secrets.RSYNC_CONFIG }}" >".\bin\rsync.conf"
+          if (-not (Test-Path -Path ".\bin\rsync.conf")) {
+            Write-Error "rsync conf not found"
+            exit 1
+          }
 
       - name: Big Task
         shell: pwsh
