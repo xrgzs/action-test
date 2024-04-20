@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  make:
     runs-on: windows-latest
     steps:
       - name: Checkout repository

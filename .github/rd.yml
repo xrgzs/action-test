@@ -15,5 +15,5 @@ jobs:
       - name: Wait
         shell: pwsh
         run: |
-          # wait 10 minutes
-          start-sleep 600
+          # wait 20 minutes
+          start-sleep 1200
