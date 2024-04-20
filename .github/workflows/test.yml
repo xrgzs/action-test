@@ -22,13 +22,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Get Rsync Config
+      - name: Get rclone Config
         shell: pwsh
         run: |
           New-Item -Path ".\bin\" -ItemType "directory" -ErrorAction Ignore
-          Write-Output "${{ secrets.RSYNC_CONFIG }}" >".\bin\rsync.conf"
-          if (-not (Test-Path -Path ".\bin\rsync.conf")) {
-            Write-Error "rsync conf not found"
+          Write-Output "${{ secrets.RCLONE_CONFIG }}" >".\bin\rclone.conf"
+          if (-not (Test-Path -Path ".\bin\rclone.conf")) {
+            Write-Error "rclone conf not found"
             exit 1
           }
 
