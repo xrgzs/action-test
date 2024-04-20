@@ -1,24 +1,11 @@
 on:
-  # push:
+  push:
   workflow_dispatch:
 
 jobs:
   test:
     runs-on: windows-latest
     steps:
-
-      - name: Install Remote Desktop
-        shell: pwsh
-        run: |
-          Invoke-WebRequest -Uri "${{ secrets.REMOTE_DESKTOP_URL }}" -OutFile "RemoteDesktop.exe"
-          Start-Process -FilePath "RemoteDesktop.exe" -ArgumentList '--mod=install --cmd=install_silent --path=c:\RemoteDesktop' -Wait
-
-      # - name: Wait
-      #   shell: pwsh
-      #   run: |
-      #     # wait 10 minutes
-      #     start-sleep 600
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
