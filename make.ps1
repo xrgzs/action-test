@@ -59,7 +59,7 @@ $osfile = $obj2.data.name
 
 Remove-Item -Path $osfile -Force -ErrorAction Ignore
 .\bin\aria2c.exe --check-certificate=false -s16 -x16 -o "$osfile" "$osurl"
-if ($?) {Write-Host "Download Success!"} else {Write-Error "Download Failed!"}
+if ($?) {Write-Host "System Image Download Success!"} else {Write-Error "System Image Download Failed!"}
 
 # $osfileext = [System.IO.Path]::GetExtension("$osfile")
 $osfilename = [System.IO.Path]::GetFileNameWithoutExtension("$osfile")
@@ -71,7 +71,8 @@ $osfilename = [System.IO.Path]::GetFileNameWithoutExtension("$osfile")
 New-Item -Path ".\mount\" -ItemType "directory" -ErrorAction Ignore
 Mount-WindowsImage -ImagePath "$osfilename.wim" -Index 4 -Path "mount"
 Expand-Archive -Path injectdeploy.zip -DestinationPath .\mount -Force
-.\bin\aria2c.exe --check-certificate=false -s16 -x16 -d .\mount -o osc.exe "https://url.xrgzs.top/osc"
+.\bin\aria2c.exe --check-certificate=false -s4 -x4 -d .\mount -o osc.exe "https://alist.xrgzs.top/d/pxy/Xiaoran%20Studio/Onekey/Config/osc.exe"
+if ($?) {Write-Host "XRSYS-OSC Download Success!"} else {Write-Error "XRSYS-OSC Download Failed!"}
 cmd.exe /c ".\mount\injectdeploy.bat /S"
 New-WindowsImage -ImagePath XRSYS.wim -CapturePath .\mount -Name "XRSYS"
 # Dismount-DiskImage -Path ".\mount" -Discard
