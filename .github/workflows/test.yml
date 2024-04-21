@@ -19,7 +19,6 @@ jobs:
       - name: Change DNS Server
         shell: pwsh
         run: |
-          Get-DnsClientServerAddress
           $newDnsServers = @('8.8.8.8', '1.1.1.1')
           $networkAdapters = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' }
           foreach ($adapter in $networkAdapters) {

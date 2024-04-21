@@ -63,4 +63,5 @@ $osfilename = [System.IO.Path]::GetFileNameWithoutExtension("$osfile")
 # .\bin\wimlib\wimlib-imagex.exe export "$osfile" 9 "$osfilename.esd" --solid
 # if ($?) { Write-Host "Convert Success!"} else {Write-Error "Convert Failed!"}
 
-.\bin\rclone.exe copy "$osfile" "odb:/Share/Xiaoran Studio/System/Nightly" --progress --buffer-size=200M
+# .\bin\rclone.exe copy "$osfile" "odb:/Share/Xiaoran Studio/System/Nightly" --progress
+.\bin\rclone.exe copy "$osfile" "r2:testaction" --progress
