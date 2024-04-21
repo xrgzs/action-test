@@ -19,13 +19,20 @@ jobs:
       - name: Change DNS Server
         shell: pwsh
         run: |
-          $newDnsServers = @('8.8.8.8', '1.1.1.1')
+          $newDnsServers = @('1.1.1.1', '8.8.8.8')
           $networkAdapters = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' }
           foreach ($adapter in $networkAdapters) {
               Set-DnsClientServerAddress -InterfaceIndex $adapter.ifIndex -ResetServerAddresses
               Set-DnsClientServerAddress -InterfaceIndex $adapter.ifIndex -ServerAddresses $newDnsServers
           }
           ipconfig /flushdns
+
+      - name: Setup WARP to speed up OneDrive
+        uses: oHTGo/setup-cloudflare-warp-action@master
+        with:
+          organization: Xiaoran Studio
+          auth_client_id: ${{ secrets.WARP_AUTH_CLIENT_ID }}
+          auth_client_secret: ${{ secrets.WARP_AUTH_CLIENT_SECRET }}
 
       - name: Big Task
         shell: pwsh
