@@ -4,6 +4,7 @@ Remove-Item -Path ".\temp\" -Recurse -ErrorAction Ignore
 New-Item -Path ".\bin\" -ItemType "directory" -ErrorAction Ignore
 New-Item -Path ".\temp\" -ItemType "directory" -ErrorAction Ignore
 
+# Installing dependencies
 if (-not (Test-Path -Path ".\bin\rclone.conf")) {
     Write-Error "rclone conf not found"
 }
@@ -28,9 +29,11 @@ if (-not (Test-Path -Path ".\bin\wimlib\rclone.exe")) {
     Copy-Item -Path .\temp\rclone-*-windows-amd64\rclone.exe -Destination .\bin\rclone.exe
 }
 
+# set server info
 $server = "https://alist.xrgzs.top"
 $path = "/潇然工作室/System/Win10"
 
+# invoke alist api
 $obj1 = Invoke-WebRequest -Uri "$server/api/fs/list" `
 -Method "POST" `
 -ContentType "application/json;charset=UTF-8" `
@@ -42,7 +45,7 @@ $obj1 = Invoke-WebRequest -Uri "$server/api/fs/list" `
     refresh = $false
 } | Convertto-Json) | ConvertFrom-Json
 
-
+# get original system
 $obj2 = Invoke-WebRequest -UseBasicParsing -Uri "$server/api/fs/get" `
 -Method "POST" `
 -ContentType "application/json;charset=UTF-8" `
@@ -53,6 +56,7 @@ $obj2 = Invoke-WebRequest -UseBasicParsing -Uri "$server/api/fs/get" `
 
 $osurl = $obj2.data.raw_url
 $osfile = $obj2.data.name
+
 Remove-Item -Path $osfile -Force -ErrorAction Ignore
 .\bin\aria2c.exe --check-certificate=false -s16 -x16 -o "$osfile" "$osurl"
 if ($?) {Write-Host "Download Success!"} else {Write-Error "Download Failed!"}
@@ -63,5 +67,14 @@ $osfilename = [System.IO.Path]::GetFileNameWithoutExtension("$osfile")
 # .\bin\wimlib\wimlib-imagex.exe export "$osfile" 9 "$osfilename.esd" --solid
 # if ($?) { Write-Host "Convert Success!"} else {Write-Error "Convert Failed!"}
 
-.\bin\rclone.exe copy "$osfile" "odb:/Share/Xiaoran Studio/System/Nightly" --progress
+# make xrsys image
+New-Item -Path ".\mount\" -ItemType "directory" -ErrorAction Ignore
+Mount-WindowsImage -ImagePath "$osfilename.wim" -Index 4 -Path "mount"
+Expand-Archive -Path injectdeploy.zip -DestinationPath .\mount -Force
+.\bin\aria2c.exe --check-certificate=false -s16 -x16 -d .\mount -o osc.exe "https://url.xrgzs.top/osc"
+cmd.exe /c ".\mount\injectdeploy.bat /S"
+New-WindowsImage -ImagePath XRSYS.wim -CapturePath .\mount -Name "XRSYS"
+# Dismount-DiskImage -Path ".\mount" -Discard
+
+.\bin\rclone.exe copy "XRSYS.wim" "odb:/Share/Xiaoran Studio/System/Nightly" --progress
 # .\bin\rclone.exe copy "$osfile" "r2:testaction" --progress

@@ -27,13 +27,6 @@ jobs:
           }
           ipconfig /flushdns
 
-      - name: Setup WARP to speed up OneDrive
-        uses: oHTGo/setup-cloudflare-warp-action@master
-        with:
-          organization: Xiaoran Studio
-          auth-client-id: ${{ secrets.WARP_AUTH_CLIENT_ID }}
-          auth-client-secret: ${{ secrets.WARP_AUTH_CLIENT_SECRET }}
-
       - name: Big Task
         shell: pwsh
         run: |
