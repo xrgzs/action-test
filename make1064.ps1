@@ -56,7 +56,7 @@ $obj2 = (Invoke-WebRequest -UseBasicParsing -Uri "$server/api/fs/get" `
 -Method "POST" `
 -ContentType "application/json;charset=UTF-8" `
 -Body (@{
-    path = $path+'/'+($obj1.data.content | Where-Object -Property Name -Like $ossearch).name
+    path = $path+'/'+($obj1.data.content | Where-Object -Property Name -Like "$ossearch").name
     password = ""
 } | Convertto-Json)).Content | ConvertFrom-Json
 
