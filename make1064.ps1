@@ -56,14 +56,12 @@ $obj2 = (Invoke-WebRequest -UseBasicParsing -Uri "$server/api/fs/get" `
 -Method "POST" `
 -ContentType "application/json;charset=UTF-8" `
 -Body (@{
-    path = $path+'/'+($obj1.data.content | Where-Object -Property Name -Like "$ossearch").name
+    path = $ospath+'/'+($obj1.data.content | Where-Object -Property Name -Like $ossearch).name
     password = ""
 } | Convertto-Json)).Content | ConvertFrom-Json
 
 $osurl = $obj2.data.raw_url
 $osfile = $obj2.data.name
-
-Write-Output "Downloading $osfile $osurl"
 
 Remove-Item -Path $osfile -Force -ErrorAction Ignore
 .\bin\aria2c.exe --check-certificate=false -s16 -x16 -o "$osfile" "$osurl"
