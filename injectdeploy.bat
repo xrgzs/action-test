@@ -58,7 +58,6 @@ REG ADD "HKLM\Mount_SYSTEM\Setup" /f /v "CmdLine" /t REG_SZ /d "deploy.exe"
 REG UNLOAD "HKLM\Mount_SYSTEM"
 >"Windows\Setup\xrsys.txt" echo isxrsys
 echo 屏蔽“同意个人数据跨境传输”
-@REM https://www.uxpc.com/?p=14236
 if exist "Users\Default\NTUSER.DAT" (
     REG LOAD "HKLM\Mount_Default" "Users\Default\NTUSER.DAT"
     REG ADD "HKLM\Mount_Default\Software\Microsoft\Windows\CurrentVersion\CloudExperienceHost\Intent\PersonalDataExport" /f /v "PDEShown" /t REG_DWORD /d 2
