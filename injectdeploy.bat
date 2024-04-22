@@ -1,8 +1,8 @@
-chcp 65001
+chcp 65001 >nul
 @echo on
 setlocal enabledelayedexpansion
 color a
-title 潇然系统部署手动离线接管程序 - V2024.4.22
+title 潇然系统部署手动离线接管程序 - V2024.4.22.2
 cd /d "%~dp0"
 set silent=0
 
@@ -37,7 +37,8 @@ echo.
 echo 提示：即将接管系统部署，注入系统部署
 echo.
 echo 注意：1. 仅支持接管Win8.1x64、Win10x64、Win11x64系统；
-echo 　　　2. 您的执行环境如果不带choice.exe，将无法完成后续配置
+echo 　　　2. 您的执行环境如果不带choice.exe，将无法完成后续配置；
+echo 　　　3. 建议在PE环境或TrustedInstaller用户下运行此脚本
 echo.
 echo 信息：
 if exist "Windows\Es4.Deploy.exe" echo 　　　该映像使用了IT天空ES4封装
@@ -52,17 +53,53 @@ goto inject
 
 :inject
 if not exist "Windows\Panther\unattend2.xml" copy /y "Windows\Panther\unattend.xml" "Windows\Panther\unattend2.xml"
-echo 接管系统部署...
+
+echo 修改系统注册表
 REG LOAD "HKLM\Mount_SYSTEM" "Windows\System32\config\SYSTEM"
+echo 接管系统部署
 REG ADD "HKLM\Mount_SYSTEM\Setup" /f /v "CmdLine" /t REG_SZ /d "deploy.exe" 
+echo 干废WD服务
+for %%a in (
+MsSecFlt
+Sense
+WdBoot
+WdFilter
+WdNisDrv
+WdNisSvc
+WinDefend
+SgrmAgent
+SgrmBroker
+webthreatdefsvc
+webthreatdefsvc
+) do REG ADD "HKLM\Mount_SYSTEM\ControlSet001\Services\%%a" /f /v "Start" /t REG_DWORD /d 4
 REG UNLOAD "HKLM\Mount_SYSTEM"
->"Windows\Setup\xrsys.txt" echo isxrsys
+
+echo 修改软件注册表
+REG LOAD "HKLM\Mount_SOFTWARE" "Windows\System32\config\SOFTWARE"
+echo 干废WD组策略
+REG ADD "HKLM\Mount_SYSTEM\Policies\Microsoft\Windows Defender" /f /v "DisableAntiSpyware" /t REG_DWORD /d 1
+REG ADD "HKLM\Mount_SYSTEM\Policies\Microsoft\Windows Defender" /f /v "DisableAntiVirus" /t REG_DWORD /d 1
+REG ADD "HKLM\Mount_SYSTEM\Policies\Microsoft\Windows Defender" /f /v "AllowFastServiceStartup" /t REG_DWORD /d 0
+REG ADD "HKLM\Mount_SYSTEM\Policies\Microsoft\Windows Defender\Real-Time Protection" /f /v "DisableRealtimeMonitoring" /t REG_DWORD /d 1
+REG ADD "HKLM\Mount_SYSTEM\Policies\Microsoft\Windows Defender\Real-Time Protection" /f /v "DisableIOAVProtection" /t REG_DWORD /d 1
+REG ADD "HKLM\Mount_SYSTEM\Policies\Microsoft\Windows Defender\Real-Time Protection" /f /v "DisableOnAccessProtection" /t REG_DWORD /d 1
+REG ADD "HKLM\Mount_SYSTEM\Policies\Microsoft\Windows Defender\Real-Time Protection" /f /v "DisableBehaviorMonitoring" /t REG_DWORD /d 1
+REG ADD "HKLM\Mount_SYSTEM\Policies\Microsoft\Windows Defender\Real-Time Protection" /f /v "DisableScanOnRealtimeEnable" /t REG_DWORD /d 1
+echo 干废WD设置
+REG ADD "HKLM\Mount_SYSTEM\Microsoft\Windows Defender" /f /v "DisableAntiSpyware" /t REG_DWORD /d 1
+REG ADD "HKLM\Mount_SYSTEM\Microsoft\Windows Defender" /f /v "DisableAntiVirus" /t REG_DWORD /d 1
+REG ADD "HKLM\Mount_SYSTEM\Microsoft\Windows Defender\Features" /f /v "TamperProtection" /t REG_DWORD /d 4
+REG ADD "HKLM\Mount_SYSTEM\Microsoft\Windows Defender\Features" /f /v "TamperProtectionSource" /t REG_DWORD /d 2
+REG ADD "HKLM\Mount_SYSTEM\Microsoft\Windows Defender\Spynet" /f /v "SpyNetReporting" /t REG_DWORD /d 0
+REG ADD "HKLM\Mount_SYSTEM\Microsoft\Windows Defender\Spynet" /f /v "SubmitSamplesConsent" /t REG_DWORD /d 0
+REG UNLOAD "HKLM\Mount_SOFTWARE"
+
+echo 修改默认用户注册表
+REG LOAD "HKLM\Mount_Default" "Users\Default\NTUSER.DAT"
 echo 屏蔽“同意个人数据跨境传输”
-if exist "Users\Default\NTUSER.DAT" (
-    REG LOAD "HKLM\Mount_Default" "Users\Default\NTUSER.DAT"
-    REG ADD "HKLM\Mount_Default\Software\Microsoft\Windows\CurrentVersion\CloudExperienceHost\Intent\PersonalDataExport" /f /v "PDEShown" /t REG_DWORD /d 2
-    REG UNLOAD "HKLM\Mount_Default"
-)
+REG ADD "HKLM\Mount_Default\Software\Microsoft\Windows\CurrentVersion\CloudExperienceHost\Intent\PersonalDataExport" /f /v "PDEShown" /t REG_DWORD /d 2
+REG UNLOAD "HKLM\Mount_Default"
+>"Windows\Setup\xrsys.txt" echo isxrsys
 if %silent% EQU 0 (
     if /i "%systemdrive%"=="x:" if not exist "%windir%\System32\choice.exe" (
         copy /y "Windows\System32\choice.exe" "%windir%\System32\choice.exe"
