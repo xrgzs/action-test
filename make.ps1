@@ -85,10 +85,11 @@ Remove-Item -Path ".\mount\injectdeploy.bat" -ErrorAction Ignore
 # add drivers
 .\bin\aria2c.exe --check-certificate=false -s16 -x16 -d .\temp -o drivers.iso "$server/d/pxy/System/Driver/DrvCeo_Mod/Drvceo_Win10_Win11_x64_Lite.iso"
 if ($?) {Write-Host "Driver Download Success!"} else {Write-Error "Driver Download Failed!"}
-$isomount = (Mount-DiskImage -ImagePath ".\temp\drivers.iso" -PassThru | Get-Volume).DriveLetter
+$isopath = Resolve-Path -Path ".\temp\drivers.iso"
+$isomount = (Mount-DiskImage -ImagePath $isopath -PassThru | Get-Volume).DriveLetter
 Copy-Item -Path "${isomount}:\" -Destination ".\mount\Windows\WinDrive" -Recurse -Force -ErrorAction Ignore
-Dismount-DiskImage -ImagePath ".\temp\drivers.iso"
-Remove-Item -Path ".\temp\drivers.iso" -ErrorAction Ignore
+Dismount-DiskImage -ImagePath $isopath 
+Remove-Item -Path $isopath -ErrorAction Ignore
 
 # add software pack
 .\bin\aria2c.exe --check-certificate=false -s16 -x16 -d .\temp -o pack.7z "$server/d/pxy/Xiaoran%20Studio/Onekey/Config/pack64.7z"
