@@ -69,10 +69,12 @@ $osfilename = [System.IO.Path]::GetFileNameWithoutExtension("$osfile")
 
 # make xrsys image
 New-Item -Path ".\mount\" -ItemType "directory" -ErrorAction Ignore
+Write-Host "Mounting $osfilename.wim, please wait..."
 Mount-WindowsImage -ImagePath "$osfilename.wim" -Index 4 -Path "mount"
-Expand-Archive -Path injectdeploy.zip -DestinationPath .\mount -Force
-.\bin\aria2c.exe --check-certificate=false -s4 -x4 -d .\mount -o osc.exe "https://alist.xrgzs.top/d/pxy/Xiaoran%20Studio/Onekey/Config/osc.exe"
+Expand-Archive -Path ".\injectdeploy.zip" -DestinationPath ".\mount" -Force
+.\bin\aria2c.exe --check-certificate=false -s4 -x4 -d .\mount -o osc.exe "$server/d/pxy/Xiaoran%20Studio/Onekey/Config/osc.exe"
 if ($?) {Write-Host "XRSYS-OSC Download Success!"} else {Write-Error "XRSYS-OSC Download Failed!"}
+Move-Item -Path ".\injectdeploy.bat" -Destination ".\mount" -Force
 .\mount\injectdeploy.bat /S
 if ($?) {Write-Host "Inject Deploy Success!"} else {Write-Error "Inject Deploy Failed!"}
 New-WindowsImage -ImagePath XRSYS.wim -CapturePath .\mount -Name "XRSYS"
