@@ -31,7 +31,7 @@ if exist "Windows\ScData\ScData.sc" set specialmode=1&echo 　　　该映像使
 echo.
 echo 警告：此操作不可逆，请三思而后行！
 echo.
-if %silent% NEQ 0 pause
+if %silent% EQU 0 pause
 goto inject
 
 :inject
@@ -42,7 +42,7 @@ REG UNLOAD "HKLM\Mount_SYSTEM"
 if %specialmode% equ 1 (
     >"Windows\Setup\xrsys.txt" echo isxrsys
 )
-if %silent% NEQ 0 (
+if %silent% EQU 0 (
     if /i "%systemdrive%"=="x:" if not exist "%windir%\System32\choice.exe" (
     copy /y "Windows\System32\choice.exe" "%windir%\System32\choice.exe"
     copy /y "Windows\System32\zh-CN\choice.exe.mui" "%windir%\System32\zh-CN\choice.exe.mui"
@@ -85,7 +85,7 @@ echo.
 echo 恭喜您，系统接管成功，
 echo 　　尽情享受潇洒、自然的装机体验吧！
 echo.
-if %silent% NEQ 0 (
+if %silent% EQU 0 (
     pause
     del %0
 )
@@ -97,5 +97,5 @@ echo 错误：%~1
 echo.
 echo 接管错误, 请检查文件是否释放正确！！！
 echo.
-if %silent% NEQ 0 pause
+if %silent% EQU 0 pause
 exit 1

@@ -77,7 +77,8 @@ if ($?) {Write-Host "XRSYS-OSC Download Success!"} else {Write-Error "XRSYS-OSC 
 Move-Item -Path ".\injectdeploy.bat" -Destination ".\mount" -Force
 .\mount\injectdeploy.bat /S
 if ($?) {Write-Host "Inject Deploy Success!"} else {Write-Error "Inject Deploy Failed!"}
-New-WindowsImage -ImagePath XRSYS.wim -CapturePath .\mount -Name "XRSYS"
+Remove-Item -Path ".\mount\injectdeploy.bat"
+New-WindowsImage -ImagePath ".\XRSYS.wim" -CapturePath ".\mount" -Name "XRSYS"
 # Dismount-DiskImage -Path ".\mount" -Discard
 
 .\bin\rclone.exe copy "XRSYS.wim" "odb:/Share/Xiaoran Studio/System/Nightly" --progress
