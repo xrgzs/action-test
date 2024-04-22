@@ -1,5 +1,5 @@
 chcp 65001
-@echo off
+@echo on
 setlocal enabledelayedexpansion
 color a
 title 潇然系统部署手动离线接管程序 - V2024.4.22
@@ -99,7 +99,7 @@ if %errorlevel% equ 1 (
         >"Windows\Setup\xrsysnewuser.txt" echo !username!
     )
 )
-goto success
+goto :success
 
 :success
 cls
