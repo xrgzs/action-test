@@ -1,8 +1,16 @@
 $ErrorActionPreference = 'Stop'
 
-# set server info
+# set original system info
 $server = "https://alist.xrgzs.top"
-$path = "/潇然工作室/System/Win10"
+$ospath = "/潇然工作室/System/Win10"
+$ossearch = "msupdate*.wim"
+
+# set version
+Set-TimeZone -Id "China Standard Time" -PassThru
+$sysdate = Get-Date -Format "yyyy.MM.dd.Hm"
+$sysver = "XRSYS_Win10_22H2_Pro_x64_CN_Full"
+$sysvercn = "潇然系统_Win10_22H2_专业_x64_完整"
+$sysfile = "${sysver}_${sysdate}"
 
 # remove temporaty files
 Remove-Item -Path ".\temp\" -Recurse -ErrorAction Ignore
@@ -36,7 +44,7 @@ $obj1 = (Invoke-WebRequest -Uri "$server/api/fs/list" `
 -Method "POST" `
 -ContentType "application/json;charset=UTF-8" `
 -Body (@{
-    path = $path
+    path = $ospath
     page = 1
     password = ""
     per_page = 0
@@ -48,7 +56,7 @@ $obj2 = (Invoke-WebRequest -UseBasicParsing -Uri "$server/api/fs/get" `
 -Method "POST" `
 -ContentType "application/json;charset=UTF-8" `
 -Body (@{
-    path = $path+'/'+($obj1.data.content | Where-Object -Property Name -Like 'msupdate*.wim').name
+    path = $path+'/'+($obj1.data.content | Where-Object -Property Name -Like $ossearch).name
     password = ""
 } | Convertto-Json)).Content | ConvertFrom-Json
 
@@ -78,7 +86,7 @@ if ($?) {Write-Host "Inject Deploy Successfully!"} else {Write-Error "Inject Dep
 Remove-Item -Path ".\mount\injectdeploy.bat" -ErrorAction Ignore
 
 # add drivers
-.\bin\aria2c.exe --check-certificate=false -s16 -x16 -d .\temp -o drivers.iso "$server/d/pxy/System/Driver/DrvCeo_Mod/Drvceo_Win10_Win11_x64_Lite.iso"
+.\bin\aria2c.exe --check-certificate=false -s16 -x16 -d .\temp -o drivers.iso "$server/d/pxy/System/Driver/DP/DPWin10x64.iso"
 if ($?) {Write-Host "Driver Download Successfully!"} else {Write-Error "Driver Download Failed!"}
 $isopath = Resolve-Path -Path ".\temp\drivers.iso"
 $isomount = (Mount-DiskImage -ImagePath $isopath -PassThru | Get-Volume).DriveLetter
@@ -130,12 +138,9 @@ foreach ($appName in @(
 Disable-WindowsOptionalFeature -Path ".\mount" -FeatureName Windows-Defender-Default-Definitions -ErrorAction Ignore
 Disable-WindowsOptionalFeature -Path ".\mount" -FeatureName Windows-Defender-ApplicationGuard -ErrorAction Ignore
 
-# Generate version
-Set-TimeZone -Id "China Standard Time" -PassThru
-$sysdate = Get-Date -Format "yyyy.MM.dd.Hm"
-$sysver = "XRSYS_Win10_22H2_Pro_x64_CN_Full"
-$sysvercn = "潇然系统_Win10_22H2_专业_x64_完整"
-$sysfile = "${sysver}_${sysdate}"
+# write version
+Write-Output "${sysvercn}_${sysdate}" >".\mount\Version.txt"
+Write-Output "${sysver}_${sysdate}" >>".\mount\Version.txt"
 
 # capture system image
 Write-Host "Packing $sysfile.wim, please wait..."
@@ -160,6 +165,7 @@ describe=${sysver}
 Time=${sysdate}
 OSUrl=${server}/d/pxy/Xiaoran%20Studio/System/Nightly/${sysfile}.esd
 OSFile=${sysfile}.esd
+Icon=10
 UEFI=1
 Bit=${sysfilesize} GB
 md5=${sysfilemd5}
