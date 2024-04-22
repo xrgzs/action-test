@@ -2,14 +2,31 @@ chcp 65001
 @echo off
 setlocal enabledelayedexpansion
 color a
-title 潇然系统部署手动接管程序 - V2024.4.21
+title 潇然系统部署手动离线接管程序 - V2024.4.22
 cd /d "%~dp0"
 set silent=0
+
+@REM 检测静默参数
 if /i "%1"=="/S" set silent=1
+
+@REM 创建文件夹
+for %%a in (
+    Windows\Setup\Set\InDeploy
+    Windows\Setup\Set\osc
+    Windows\Setup\Set\Run
+    Windows\Setup\Run\1
+    Windows\Setup\Run\2
+) do (
+    mkdir "%%a" 2>nul
+)
+
+@REM 处理文件
+if exist "unattend.xml" move /y "unattend.xml" "Windows\Panther\unattend.xml"
 if exist "osc.exe" move /y "osc.exe" "Windows\Setup\Set\osc.exe"
+
+@REM 判断文件完整性
 if not exist "Windows\System32\config\SYSTEM" call :error "找不到系统注册表文件"
 if not exist "Windows\Panther\unattend.xml" call :error "找不到unattend.xml文件"
-@rem if not exist "Windows\Setup\Set\api.exe" call :error "找不到api.exe文件"
 if not exist "Windows\Setup\Set\osc.exe" call :error "找不到osc.exe文件"
 find /i "IMAGE_STATE_COMPLETE" "Windows\Setup\State\State.ini" && call :error "不支持接管已经部署/未封装的映像"
 goto main
@@ -23,11 +40,10 @@ echo 注意：1. 仅支持接管Win8.1x64、Win10x64、Win11x64系统；
 echo 　　　2. 您的执行环境如果不带choice.exe，将无法完成后续配置
 echo.
 echo 信息：
-set specialmode=0
-if exist "Windows\Es4.Deploy.exe" set specialmode=1&echo 　　　该映像使用了IT天空ES4封装
-if exist "Sysprep\ES5\EsDeploy.exe" set specialmode=1&echo 　　　该映像使用了IT天空ES5封装
-if exist "Sysprep\ES5S\ES5S.exe" set specialmode=1&echo 　　　该映像使用了IT天空ES5S封装
-if exist "Windows\ScData\ScData.sc" set specialmode=1&echo 　　　该映像使用了系统总裁SCPT3.0封装
+if exist "Windows\Es4.Deploy.exe" echo 　　　该映像使用了IT天空ES4封装
+if exist "Sysprep\ES5\EsDeploy.exe" echo 　　　该映像使用了IT天空ES5封装
+if exist "Sysprep\ES5S\ES5S.exe" echo 　　　该映像使用了IT天空ES5S封装
+if exist "Windows\ScData\ScData.sc" echo 　　　该映像使用了系统总裁SCPT3.0封装
 echo.
 echo 警告：此操作不可逆，请三思而后行！
 echo.
@@ -36,11 +52,17 @@ goto inject
 
 :inject
 if not exist "Windows\Panther\unattend2.xml" copy /y "Windows\Panther\unattend.xml" "Windows\Panther\unattend2.xml"
+echo 接管系统部署...
 REG LOAD "HKLM\Mount_SYSTEM" "Windows\System32\config\SYSTEM"
 REG ADD "HKLM\Mount_SYSTEM\Setup" /f /v "CmdLine" /t REG_SZ /d "deploy.exe" 
 REG UNLOAD "HKLM\Mount_SYSTEM"
-if %specialmode% equ 1 (
-    >"Windows\Setup\xrsys.txt" echo isxrsys
+>"Windows\Setup\xrsys.txt" echo isxrsys
+@REM 屏蔽“同意个人数据跨境传输”
+@REM https://www.uxpc.com/?p=14236
+if exist "Users\Default\NTUSER.DAT" (
+    REG LOAD "HKLM\Mount_Default" "Users\Default\NTUSER.DAT"
+    REG ADD "HKLM\Mount_Default\Software\Microsoft\Windows\CurrentVersion\CloudExperienceHost\Intent\PersonalDataExport" /f /v "PDEShown" /t REG_DWORD /d 2 &echo.
+    REG UNLOAD "HKLM\Mount_Default"
 )
 if %silent% EQU 0 (
     if /i "%systemdrive%"=="x:" if not exist "%windir%\System32\choice.exe" (
