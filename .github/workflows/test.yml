@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  make:
+  make1064:
     runs-on: windows-latest
     steps:
       - name: Checkout repository
@@ -30,4 +30,4 @@ jobs:
       - name: Big Task
         shell: pwsh
         run: |
-          .\make.ps1
+          .\make1064.ps1
