@@ -142,7 +142,6 @@ Disable-WindowsOptionalFeature -Path ".\mount" -FeatureName Windows-Defender-Def
 Disable-WindowsOptionalFeature -Path ".\mount" -FeatureName Windows-Defender-ApplicationGuard -ErrorAction Ignore
 
 # write version
-Set-Content
 "${sysvercn}_${sysdate} 
 ${sysver}_${sysdate}
 " | Out-File -FilePath ".\mount\Windows\Version.txt" -Encoding gbk
