@@ -7,7 +7,7 @@ $ossearch = "msupdate*.wim"
 
 # set version
 Set-TimeZone -Id "China Standard Time" -PassThru
-$sysdate = Get-Date -Format "yyyy.MM.dd.Hm"
+$sysdate = Get-Date -Format "yyyy.MM.dd.HHmm"
 $sysver = "XRSYS_Win10_22H2_Pro_x64_CN_Full"
 $sysvercn = "潇然系统_Win10_22H2_专业_x64_完整"
 $sysfile = "${sysver}_${sysdate}"
