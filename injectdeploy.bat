@@ -2,7 +2,7 @@ chcp 65001 >nul
 @echo on
 setlocal enabledelayedexpansion
 color a
-title 潇然系统部署手动离线接管程序 - V2024.4.22.2
+title 潇然系统部署手动离线接管程序 - V2024.4.27.0
 cd /d "%~dp0"
 set silent=0
 
@@ -72,32 +72,80 @@ SgrmBroker
 webthreatdefsvc
 webthreatdefsvc
 ) do REG ADD "HKLM\Mount_SYSTEM\ControlSet001\Services\%%a" /f /v "Start" /t REG_DWORD /d 4
+echo 跳过系统配置检测
+for %%a in (
+BypassCPUCheck
+BypassRAMCheck
+BypassSecureBootCheck
+BypassStorageCheck
+BypassTPMCheck
+) do REG ADD "HKLM\Mount_SYSTEM\\Setup\LabConfig"/f /v "%%a" /t REG_DWORD /d 1
+REG ADD "HKLM\Mount_SYSTEM\\Setup\MoSetup"/f /v "AllowUpgradesWithUnsupportedTPMOrCPU" /t REG_DWORD /d 1
 REG UNLOAD "HKLM\Mount_SYSTEM"
 
 echo 修改软件注册表
 REG LOAD "HKLM\Mount_SOFTWARE" "Windows\System32\config\SOFTWARE"
 echo 干废WD组策略
-REG ADD "HKLM\Mount_SYSTEM\Policies\Microsoft\Windows Defender" /f /v "DisableAntiSpyware" /t REG_DWORD /d 1
-REG ADD "HKLM\Mount_SYSTEM\Policies\Microsoft\Windows Defender" /f /v "DisableAntiVirus" /t REG_DWORD /d 1
-REG ADD "HKLM\Mount_SYSTEM\Policies\Microsoft\Windows Defender" /f /v "AllowFastServiceStartup" /t REG_DWORD /d 0
-REG ADD "HKLM\Mount_SYSTEM\Policies\Microsoft\Windows Defender\Real-Time Protection" /f /v "DisableRealtimeMonitoring" /t REG_DWORD /d 1
-REG ADD "HKLM\Mount_SYSTEM\Policies\Microsoft\Windows Defender\Real-Time Protection" /f /v "DisableIOAVProtection" /t REG_DWORD /d 1
-REG ADD "HKLM\Mount_SYSTEM\Policies\Microsoft\Windows Defender\Real-Time Protection" /f /v "DisableOnAccessProtection" /t REG_DWORD /d 1
-REG ADD "HKLM\Mount_SYSTEM\Policies\Microsoft\Windows Defender\Real-Time Protection" /f /v "DisableBehaviorMonitoring" /t REG_DWORD /d 1
-REG ADD "HKLM\Mount_SYSTEM\Policies\Microsoft\Windows Defender\Real-Time Protection" /f /v "DisableScanOnRealtimeEnable" /t REG_DWORD /d 1
+REG ADD "HKLM\Mount_SOFTWARE\Policies\Microsoft\Windows Defender" /f /v "DisableAntiSpyware" /t REG_DWORD /d 1
+REG ADD "HKLM\Mount_SOFTWARE\Policies\Microsoft\Windows Defender" /f /v "DisableAntiVirus" /t REG_DWORD /d 1
+REG ADD "HKLM\Mount_SOFTWARE\Policies\Microsoft\Windows Defender" /f /v "AllowFastServiceStartup" /t REG_DWORD /d 0
+REG ADD "HKLM\Mount_SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection" /f /v "DisableRealtimeMonitoring" /t REG_DWORD /d 1
+REG ADD "HKLM\Mount_SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection" /f /v "DisableIOAVProtection" /t REG_DWORD /d 1
+REG ADD "HKLM\Mount_SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection" /f /v "DisableOnAccessProtection" /t REG_DWORD /d 1
+REG ADD "HKLM\Mount_SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection" /f /v "DisableBehaviorMonitoring" /t REG_DWORD /d 1
+REG ADD "HKLM\Mount_SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection" /f /v "DisableScanOnRealtimeEnable" /t REG_DWORD /d 1
 echo 干废WD设置
-REG ADD "HKLM\Mount_SYSTEM\Microsoft\Windows Defender" /f /v "DisableAntiSpyware" /t REG_DWORD /d 1
-REG ADD "HKLM\Mount_SYSTEM\Microsoft\Windows Defender" /f /v "DisableAntiVirus" /t REG_DWORD /d 1
-REG ADD "HKLM\Mount_SYSTEM\Microsoft\Windows Defender\Features" /f /v "TamperProtection" /t REG_DWORD /d 4
-REG ADD "HKLM\Mount_SYSTEM\Microsoft\Windows Defender\Features" /f /v "TamperProtectionSource" /t REG_DWORD /d 2
-REG ADD "HKLM\Mount_SYSTEM\Microsoft\Windows Defender\Spynet" /f /v "SpyNetReporting" /t REG_DWORD /d 0
-REG ADD "HKLM\Mount_SYSTEM\Microsoft\Windows Defender\Spynet" /f /v "SubmitSamplesConsent" /t REG_DWORD /d 0
+REG ADD "HKLM\Mount_SOFTWARE\Microsoft\Windows Defender" /f /v "DisableAntiSpyware" /t REG_DWORD /d 1
+REG ADD "HKLM\Mount_SOFTWARE\Microsoft\Windows Defender" /f /v "DisableAntiVirus" /t REG_DWORD /d 1
+REG ADD "HKLM\Mount_SOFTWARE\Microsoft\Windows Defender\Features" /f /v "TamperProtection" /t REG_DWORD /d 4
+REG ADD "HKLM\Mount_SOFTWARE\Microsoft\Windows Defender\Features" /f /v "TamperProtectionSource" /t REG_DWORD /d 2
+REG ADD "HKLM\Mount_SOFTWARE\Microsoft\Windows Defender\Spynet" /f /v "SpyNetReporting" /t REG_DWORD /d 0
+REG ADD "HKLM\Mount_SOFTWARE\Microsoft\Windows Defender\Spynet" /f /v "SubmitSamplesConsent" /t REG_DWORD /d 0
+echo 禁用保留存储的空间占用
+REG ADD "HKLM\Mount_SOFTWARE\Microsoft\Windows\CurrentVersion\ReserveManager" /v "MiscPolicyInfo" /t REG_DWORD /d "2" /f
+REG ADD "HKLM\Mount_SOFTWARE\Microsoft\Windows\CurrentVersion\ReserveManager" /v "PassedPolicy" /t REG_DWORD /d "0" /f
+REG ADD "HKLM\Mount_SOFTWARE\Microsoft\Windows\CurrentVersion\ReserveManager" /v "ShippedWithReserves" /t REG_DWORD /d "0" /f
+echo 处理OOBE
+REG ADD "HKLM\Mount_SOFTWARE\Microsoft\Windows\CurrentVersion\OOBE" /v "BypassNRO" /t REG_DWORD /d "1" /f
 REG UNLOAD "HKLM\Mount_SOFTWARE"
+
+
 
 echo 修改默认用户注册表
 REG LOAD "HKLM\Mount_Default" "Users\Default\NTUSER.DAT"
+echo 跳过系统配置检测
+for %%a in (SV1,SV2) do REG ADD "HKLM\Mount_Default\Control Panel\UnsupportedHardwareNotificationCache" /f /v "%%a" /t REG_DWORD /d 0
+
+
 echo 屏蔽“同意个人数据跨境传输”
 REG ADD "HKLM\Mount_Default\Software\Microsoft\Windows\CurrentVersion\CloudExperienceHost\Intent\PersonalDataExport" /f /v "PDEShown" /t REG_DWORD /d 2
+echo 禁用 Windows 全新安装后擅自安装三方 App
+for %%a in (
+ContentDeliveryAllowed
+DesktopSpotlightOemEnabled
+FeatureManagementEnabled
+OemPreInstalledAppsEnabled
+PreInstalledAppsEnabled
+PreInstalledAppsEverEnabled
+RemediationRequired
+SilentInstalledAppsEnabled
+SlideshowEnabled
+SoftLandingEnabled
+SystemPaneSuggestionsEnabled
+SubscribedContentEnabled
+) do REG ADD "HKLM\Mount_Default\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "%%a" /t REG_DWORD /d "0" /f
+echo 禁用 Windows 在各处无用的建议提示
+for %%a in (
+310093Enabled
+338388Enabled
+338389Enabled
+338393Enabled
+353694Enabled
+353696Enabled
+) do REG ADD "HKLM\Mount_Default\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v "SubscribedContent-%%a" /t REG_DWORD /d "0" /f
+echo 禁用游戏栏 Game Bar
+REG ADD "HKLM\Mount_Default\SOFTWARE\Microsoft\GameBar" /v "UseNexusForGameBarEnabled" /t REG_DWORD /d "0" /f
+
 REG UNLOAD "HKLM\Mount_Default"
 >"Windows\Setup\xrsys.txt" echo isxrsys
 if %silent% EQU 0 (

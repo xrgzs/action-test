@@ -2,14 +2,14 @@ $ErrorActionPreference = 'Stop'
 
 # set original system info
 $server = "https://alist.xrgzs.top"
-$ospath = "/潇然工作室/System/Win11"
-$ossearch = "msupdate*.wim"
+$ospath = "/潇然工作室/System/Win10"
+$ossearch = "msupdate*.esd"
 
 # set version
 Set-TimeZone -Id "China Standard Time" -PassThru
 $sysdate = Get-Date -Format "yyyy.MM.dd.HHmm"
-$sysver = "XRSYS_Win11_23H2_Pro_x64_CN_Full"
-$sysvercn = "潇然系统_Win11_23H2_专业_x64_完整"
+$sysver = "XRSYS_Win10_22H2_Pro_x64_CN_Full"
+$sysvercn = "潇然系统_Win10_22H2_专业_x64_完整"
 $sysfile = "${sysver}_${sysdate}"
 
 # remove temporaty files
@@ -39,7 +39,7 @@ if (-not (Test-Path -Path ".\bin\rclone.exe")) {
     Copy-Item -Path .\temp\rclone-*-windows-amd64\rclone.exe -Destination .\bin\rclone.exe
 }
 
-# invoke server list
+# parse server file list
 $obj1 = (Invoke-WebRequest -Uri "$server/api/fs/list" `
 -Method "POST" `
 -ContentType "application/json;charset=UTF-8" `
@@ -67,8 +67,13 @@ Remove-Item -Path $osfile -Force -ErrorAction Ignore
 .\bin\aria2c.exe --check-certificate=false -s16 -x16 -o "$osfile" "$osurl"
 if ($?) {Write-Host "System Image Download Successfully!"} else {Write-Error "System Image Download Failed!"}
 
-# $osfileext = [System.IO.Path]::GetExtension("$osfile")
+$osfileext = [System.IO.Path]::GetExtension("$osfile")
 $osfilename = [System.IO.Path]::GetFileNameWithoutExtension("$osfile")
+
+if ($osfilename -eq ".wim") {
+    # convert esd to wim
+    .\bin\wimlib\wimlib-imagex.exe export "$osfile" all "$osfilename.wim" --compress fast
+}
 
 # make xrsys image
 # mount image
@@ -169,7 +174,7 @@ describe=${sysver}
 Time=${sysdate}
 OSUrl=${server}/d/pxy/Xiaoran%20Studio/System/Nightly/${sysfile}.esd
 OSFile=${sysfile}.esd
-Icon=11
+Icon=10
 UEFI=1
 Index=1
 Bit=${sysfilesize} GB
