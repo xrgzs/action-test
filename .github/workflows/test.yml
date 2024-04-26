@@ -1,61 +1,15 @@
 on:
+  push:
   workflow_dispatch:
 
 jobs:
-  make1064:
-    runs-on: windows-latest
+  example_matrix:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-20.04]
+        version: [10, 12, 14]
+    runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Get rclone Config
-        uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          repository: xrgzs/rclone-action
-          token: ${{ secrets.RCLONE_TOKEN }}
-          path: bin
-
-      - name: Change DNS Server
-        shell: pwsh
-        run: |
-          $newDnsServers = @('1.1.1.1', '8.8.8.8')
-          $networkAdapters = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' }
-          foreach ($adapter in $networkAdapters) {
-              Set-DnsClientServerAddress -InterfaceIndex $adapter.ifIndex -ResetServerAddresses
-              Set-DnsClientServerAddress -InterfaceIndex $adapter.ifIndex -ServerAddresses $newDnsServers
-          }
-          ipconfig /flushdns
-
-      - name: Big Task
-        shell: pwsh
-        run: |
-          .\make1064.ps1
-
-  make1164:
-    runs-on: windows-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Get rclone Config
-        uses: actions/checkout@v4
-        with:
-          repository: xrgzs/rclone-action
-          token: ${{ secrets.RCLONE_TOKEN }}
-          path: bin
-
-      - name: Change DNS Server
-        shell: pwsh
-        run: |
-          $newDnsServers = @('1.1.1.1', '8.8.8.8')
-          $networkAdapters = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' }
-          foreach ($adapter in $networkAdapters) {
-              Set-DnsClientServerAddress -InterfaceIndex $adapter.ifIndex -ResetServerAddresses
-              Set-DnsClientServerAddress -InterfaceIndex $adapter.ifIndex -ServerAddresses $newDnsServers
-          }
-          ipconfig /flushdns
-
-      - name: Big Task
-        shell: pwsh
-        run: |
-          .\make1164.ps1
+          node-version: ${{ matrix.version }}
