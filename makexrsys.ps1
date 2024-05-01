@@ -13,7 +13,7 @@ switch ($makeversion) {
         $ospath = "/潇然工作室/System/Win10"
         $ossearch = "MSUpdate_Win10_22H2*.esd"
         $osindex = 4
-        $sysver = "XRSYS_Win11_22H2_Pro_x64_CN_Full"
+        $sysver = "XRSYS_Win10_22H2_Pro_x64_CN_Full"
         $sysvercn = "潇然系统_Win10_22H2_专业_x64_完整"
     }
     Default {
@@ -39,6 +39,9 @@ New-Item -Path ".\temp\" -ItemType "directory" -ErrorAction Ignore
 # Installing dependencies
 if (-not (Test-Path -Path ".\bin\rclone.conf")) {
     Write-Error "rclone conf not found"
+}
+if (-not (Test-Path -Path "C:\Program Files\7-Zip\7z.exe")) {
+    Write-Error "7-zip not found, please install it manually!"
 }
 if (-not (Test-Path -Path ".\bin\aria2c.exe")) {
     Write-Host "aria2c not found, downloading..."
@@ -89,8 +92,27 @@ if ($?) {Write-Host "System Image Download Successfully!"} else {Write-Error "Sy
 $osfileext = [System.IO.Path]::GetExtension("$osfile")
 $osfilename = [System.IO.Path]::GetFileNameWithoutExtension("$osfile")
 
+# extract iso
+if ($osfileext -eq ".iso") {
+    
+    ."C:\Program Files\7-Zip\7z.exe" e -y "$osfile" sources\install.wim
+    if ($?) {
+        Write-Host "extract iso Successfully!"
+        $osfile = "install.wim"
+        $osfilename = "install"
+        $osfileext = ".wim"
+    } else {
+        ."C:\Program Files\7-Zip\7z.exe" e -y "$osfile" sources\install.esd
+        $osfile = "install.esd"
+        $osfilename = "install"
+        $osfileext = ".esd"
+        if ($?) {Write-Host "extract esd Successfully!"} else {
+            Write-Error "extract iso or esd failed!"
+        }
+    }
+}
+# convert esd to wim
 if ($osfileext -eq ".esd") {
-    # convert esd to wim
     .\bin\wimlib\wimlib-imagex.exe export "$osfile" all "$osfilename.wim" --compress fast
 }
 
@@ -211,4 +233,3 @@ SHA256  ：${sysfilesha256}
 if ($?) {Write-Host "Upload Successfully!"} else {Write-Error "Upload Failed!"}
 .\bin\rclone.exe copy "$sysfile.OsList.ini" "odb:/Share/Xiaoran Studio/System/Nightly" --progress
 .\bin\rclone.exe copy "$sysfile.txt" "odb:/Share/Xiaoran Studio/System/Nightly" --progress
-# .\bin\rclone.exe copy "$osfile" "r2:testaction" --progress
