@@ -1,13 +1,17 @@
+
 chcp 65001 >nul
-@echo on
+@echo off
 setlocal enabledelayedexpansion
 color a
-title 潇然系统部署手动离线接管程序 - V2024.4.27.0
+title 潇然系统部署手动离线接管程序 - V2024.5.1.0
 cd /d "%~dp0"
 set silent=0
 
 @REM 检测静默参数
-if /i "%1"=="/S" set silent=1
+if /i "%1"=="/S" (
+    set silent=1
+    @echo on
+)
 
 @REM 创建文件夹
 for %%a in (
