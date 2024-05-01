@@ -1,15 +1,33 @@
 $ErrorActionPreference = 'Stop'
 
 # set original system info
-$server = "https://alist.xrgzs.top"
-$ospath = "/潇然工作室/System/Win10"
-$ossearch = "msupdate*.esd"
+switch ($makeversion) {
+    "w1164" {
+        $ospath = "/潇然工作室/System/Win11"
+        $ossearch = "MSUpdate_Win11_23H2*.esd"
+        $osindex = 4
+        $sysver = "XRSYS_Win11_23H2_Pro_x64_CN_Full"
+        $sysvercn = "潇然系统_Win11_23H2_专业_x64_完整"
+    }
+    "w1064" {
+        $ospath = "/潇然工作室/System/Win10"
+        $ossearch = "MSUpdate_Win10_22H2*.esd"
+        $sysver = "XRSYS_Win11_22H2_Pro_x64_CN_Full"
+        $sysvercn = "潇然系统_Win10_22H2_专业_x64_完整"
+    }
+    Default {
+        Write-Error "Unknown version.
+        Example:
+            `$makeversion = [string] `"w1164`"
+            .\makexrsys.ps1
+        "
+    }
+}
 
 # set version
+$server = "https://alist.xrgzs.top"
 Set-TimeZone -Id "China Standard Time" -PassThru
 $sysdate = Get-Date -Format "yyyy.MM.dd.HHmm"
-$sysver = "XRSYS_Win10_22H2_Pro_x64_CN_Full"
-$sysvercn = "潇然系统_Win10_22H2_专业_x64_完整"
 $sysfile = "${sysver}_${sysdate}"
 
 # remove temporaty files
@@ -70,7 +88,7 @@ if ($?) {Write-Host "System Image Download Successfully!"} else {Write-Error "Sy
 $osfileext = [System.IO.Path]::GetExtension("$osfile")
 $osfilename = [System.IO.Path]::GetFileNameWithoutExtension("$osfile")
 
-if ($osfilename -eq ".wim") {
+if ($osfileext -eq ".esd") {
     # convert esd to wim
     .\bin\wimlib\wimlib-imagex.exe export "$osfile" all "$osfilename.wim" --compress fast
 }
@@ -79,7 +97,7 @@ if ($osfilename -eq ".wim") {
 # mount image
 New-Item -Path ".\mount\" -ItemType "directory" -ErrorAction Ignore
 Write-Host "Mounting $osfilename.wim, please wait..."
-Mount-WindowsImage -ImagePath "$osfilename.wim" -Index 4 -Path "mount"
+Mount-WindowsImage -ImagePath "$osfilename.wim" -Index $osindex -Path "mount"
 # inject deploy
 Expand-Archive -Path ".\injectdeploy.zip" -DestinationPath ".\mount" -Force
 .\bin\aria2c.exe --check-certificate=false -s4 -x4 -d .\mount -o osc.exe "$server/d/pxy/Xiaoran%20Studio/Onekey/Config/osc.exe"

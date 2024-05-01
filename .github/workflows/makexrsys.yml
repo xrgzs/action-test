@@ -1,5 +1,14 @@
+run-name: Make XRSYS Nightly
 on:
   workflow_dispatch:
+    inputs:
+      makeversion:
+        description: 'Target OS Version'
+        required: true
+        type: choice
+        options:
+          - w1164
+          - w1064
 
 jobs:
   make1064:
@@ -29,4 +38,5 @@ jobs:
       - name: Big Task
         shell: pwsh
         run: |
+          $makeversion = [string] ${{ inputs.makeversion }}
           .\makexrsys.ps1
