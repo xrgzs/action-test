@@ -1,4 +1,4 @@
-run-name: Make XRSYS Nightly
+run-name: Make XRSYS ${{ inputs.makeversion }} Nightly
 on:
   workflow_dispatch:
     inputs:
