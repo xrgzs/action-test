@@ -1,3 +1,4 @@
+name: MakeXRSYS
 run-name: Make XRSYS ${{ inputs.makeversion }} Nightly
 on:
   workflow_dispatch:
@@ -11,7 +12,7 @@ on:
           - w1064
 
 jobs:
-  make1064:
+  makexrsys:
     runs-on: windows-latest
     steps:
       - name: Checkout repository
