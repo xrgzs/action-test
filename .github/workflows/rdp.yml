@@ -21,7 +21,7 @@ jobs:
           $currentUser = $env:USERNAME
           Write-Host "Current User: $(whoami) $currentUser"
           $password = ConvertTo-SecureString -String '${{ secrets.WIN_PASSWORD }}' -AsPlainText -Force
-          Set-LocalUser -Name $currentUser -Password $password -PassThru
+          Set-LocalUser -Name $currentUser -Password $password
 
       - name: Enable Remote Desktop Protocol
         shell: pwsh
