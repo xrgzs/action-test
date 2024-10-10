@@ -22,7 +22,7 @@ jobs:
           Write-Host "Current User: $(whoami) $currentUser"
           Set-LocalUser -Name $currentUser -Password ${{ secrets.WIN_PASSWORD }}
 
-      - name: Enable Remote Desktop Protocal
+      - name: Enable Remote Desktop Protocol
         shell: pwsh
         run: |
           Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
