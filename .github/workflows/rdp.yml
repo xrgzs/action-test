@@ -1,0 +1,35 @@
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+
+      - name: Install Zerotier
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://download.zerotier.com/dist/ZeroTier%20One.msi" -OutFile "ZeroTier.msi"
+          Start-Process -FilePath "msiexec.exe" -ArgumentList "/i ZeroTier.msi /qn" -Wait
+          start-sleep 3
+          . "C:\Program Files (x86)\ZeroTier\One\zerotier-cli.bat" join ${{ secrets.ZEROTIER_ID }}
+          Write-Host "Please visit https://my.zerotier.com/ to add this machine to your network."
+
+      - name: Set Password
+        shell: pwsh
+        run: |
+          $currentUser = $env:USERNAME
+          Write-Host "Current User: $(whoami) $currentUser"
+          Set-LocalUser -Name $currentUser -Password ${{ secrets.WIN_PASSWORD }}
+
+      - name: Enable Remote Desktop Protocal
+        shell: pwsh
+        run: |
+          Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+          Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+
+      - name: Wait
+        shell: pwsh
+        run: |
+          # wait 20 minutes
+          start-sleep 1200
